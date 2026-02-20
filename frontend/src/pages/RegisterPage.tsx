@@ -50,13 +50,18 @@ export default function RegisterPage() {
 
     try {
       const response = await authAPI.register(formData);
+      console.log('Registration response:', response.data);
+      
+      // Navigate to verify email page with email in state
       navigate('/verify-email', { 
         state: { 
           userId: response.data.user?.id,
           email: formData.email 
-        } 
+        },
+        replace: true
       });
     } catch (err: any) {
+      console.error('Registration error:', err);
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
       setLoading(false);

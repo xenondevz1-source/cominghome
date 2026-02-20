@@ -41,11 +41,23 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
+      // Add timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        console.error('Auth check timeout');
+        setLoading(false);
+      }, 10000); // 10 second timeout
+
       authAPI
         .getMe()
         .then((res) => setUser(res.data.user))
-        .catch(() => localStorage.removeItem("token"))
-        .finally(() => setLoading(false));
+        .catch((err) => {
+          console.error('Auth check failed:', err);
+          localStorage.removeItem("token");
+        })
+        .finally(() => {
+          clearTimeout(timeout);
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -54,7 +66,10 @@ function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="spinner"></div>
+        <div className="text-center">
+          <div className="spinner w-12 h-12 border-4 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
       </div>
     );
   }

@@ -17,7 +17,11 @@ export default function VerifyEmailPage() {
   const [email, setEmail] = useState(location.state?.email || '');
   const [showEmailInput, setShowEmailInput] = useState(!location.state?.email);
 
-  // Don't redirect if no email - let user enter it
+  // Log for debugging
+  useEffect(() => {
+    console.log('VerifyEmailPage loaded with state:', location.state);
+    console.log('Email:', email);
+  }, []);
 
   useEffect(() => {
     if (resendCooldown > 0) {
