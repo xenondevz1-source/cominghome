@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "cominghome-backend",
   "builds": [
     {
       "src": "src/server.ts",
@@ -8,8 +9,19 @@
   ],
   "routes": [
     {
+      "src": "/health",
+      "dest": "src/server.ts"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "src/server.ts"
+    },
+    {
       "src": "/(.*)",
       "dest": "src/server.ts"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

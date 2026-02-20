@@ -1,11 +1,11 @@
 {
+  "version": 2,
+  "name": "cominghome-frontend",
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
+  "installCommand": "npm install --prefix frontend",
+  "framework": null,
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://your-backend-url.vercel.app/api/:path*"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
