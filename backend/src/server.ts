@@ -40,8 +40,13 @@ app.use(
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       
+      // Allow all Vercel domains
+      if (origin && (origin.includes('.vercel.app') || origin.includes('.vercel.com'))) {
+        return callback(null, true);
+      }
+      
       // Allow all Replit domains
-      if (origin.includes('.replit.dev') || origin.includes('.repl.co')) {
+      if (origin && (origin.includes('.replit.dev') || origin.includes('.repl.co'))) {
         return callback(null, true);
       }
       
