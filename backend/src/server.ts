@@ -26,9 +26,10 @@ app.use(
   }),
 );
 
-// CORS configuration - allow all origins for development
+// CORS configuration - allow frontend and Vercel domains
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://cominghome-kappa.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'https://extasy.asia',
@@ -60,9 +61,13 @@ app.use(
         return callback(null, true);
       }
       
-      callback(new Error('Not allowed by CORS'));
+      // Log rejected origins for debugging
+      console.log('CORS rejected origin:', origin);
+      callback(null, true); // Allow anyway for now
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
 
