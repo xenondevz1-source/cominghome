@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+        .success { border-left: 4px solid #059669; }
+        .error { border-left: 4px solid #ef4444; }
+        button {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #047857; }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #333;
+            color: white;
+        }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    
+    <div>
+        <label>Backend URL:</label>
+        <input type="text" id="backendUrl" placeholder="https://your-backend.vercel.app" style="width: 400px;">
+        <button onclick="saveUrl()">Save</button>
+    </div>
+
+    <div id="results"></div>
+
+    <div style="margin-top: 20px;">
+        <button onclick="testHealth()">1. Test Health Endpoint</button>
+        <button onclick="testCors()">2. Test CORS</button>
+        <button onclick="testRegistration()">3. Test Registration</button>
+    </div>
+
+    <script>
+        let API_URL = localStorage.getItem('apiUrl') || '';
+        document.getElementById('backendUrl').value = API_URL;
+
+        function saveUrl() {
+            API_URL = document.getElementById('backendUrl').value.replace(/\/$/, '');
+            localStorage.setItem('apiUrl', API_URL);
+            addResult('success', 'URL Saved', `Backend URL set to: ${API_URL}`);
+        }
+
+        function addResult(type, title, content) {
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <pre>${typeof content === 'object' ? JSON.stringify(content, null, 2) : content}</pre>
+            `;
+            document.getElementById('results').prepend(div);
+        }
+
+        async function testHealth() {
+            if (!API_URL) {
+                addResult('error', 'Error', 'Please set backend URL first');
+                return;
+            }
+
+            try {
+                addResult('success', 'Testing...', `GET ${API_URL}/health`);
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('success', '✅ Health Check Passed', data);
+                } else {
+                    addResult('error', '❌ Health Check Failed', data);
+                }
+            } catch (error) {
+                addResult('error', '❌ Connection Failed', error.message);
+            }
+        }
+
+        async function testCors() {
+            if (!API_URL) {
+                addResult('error', 'Error', 'Please set backend URL first');
+                return;
+            }
+
+            try {
+                addResult('success', 'Testing CORS...', `OPTIONS ${API_URL}/api/auth/register`);
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                if (response.ok || response.status === 204) {
+                    addResult('success', '✅ CORS Configured Correctly', {
+                        status: response.status,
+                        headers: Object.fromEntries(response.headers.entries())
+                    });
+                } else {
+                    addResult('error', '❌ CORS Issue', {
+                        status: response.status,
+                        statusText: response.statusText
+                    });
+                }
+            } catch (error) {
+                addResult('error', '❌ CORS Test Failed', error.message);
+            }
+        }
+
+        async function testRegistration() {
+            if (!API_URL) {
+                addResult('error', 'Error', 'Please set backend URL first');
+                return;
+            }
+
+            const testData = {
+                username: 'testuser' + Date.now(),
+                email: `test${Date.now()}@example.com`,
+                password: 'test123456'
+            };
+
+            try {
+                addResult('success', 'Testing Registration...', `POST ${API_URL}/api/auth/register\n\nData: ${JSON.stringify(testData, null, 2)}`);
+                
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('success', '✅ Registration API Works!', {
+                        status: response.status,
+                        response: data
+                    });
+                } else {
+                    addResult('error', '❌ Registration Failed', {
+                        status: response.status,
+                        error: data
+                    });
+                }
+            } catch (error) {
+                addResult('error', '❌ Registration Request Failed', error.message);
+            }
+        }
+    </script>
+</body>
+</html>
